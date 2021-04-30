@@ -1,16 +1,91 @@
 // script.js
-
+let dimensions;
+let imageLoaded = false;
+let topText = "";
+let bottomText = "";
+let utter;
+let voices;
 const img = new Image(); // used to load image from <input> and draw to canvas
+const ctx = document.getElementById('user-image').getContext('2d');
+ctx.fillStyle = 'black';
+ctx.fillRect(0,0,400,400);
+ctx.font = "36px Impact"
+ctx.textAlign = "center";
+const resetButton = document.querySelector("button[type='reset']");
+const speakButton = document.querySelector("button[type='button']");
+const imageInput = document.getElementById("image-input");
+const voiceSelect = document.getElementById("voice-selection");
+
+speechSynthesis.addEventListener("voiceschanged", e => {
+  voices = speechSynthesis.getVoices();
+  for (let voice in voices) {
+    console.log(voice);
+    const option = document.createElement("option");
+    option.textContent = voice.name + ' (' + voices.lang + ')';
+    if(voices.default) {
+      option.textContent += ' -- DEFAULT';
+    }
+    option.setAttribute('data-lang', voice.lang);
+    option.setAttribute('data-name', voice.name);
+    voiceSelect.options.add(option);
+  }
+  voiceSelect.disabled = false;
+})
+
+//Set img.src
+imageInput.addEventListener('input', e => {
+  img.src = URL.createObjectURL(imageInput.files[0]);
+  imageLoaded = true;
+  resetButton.disabled = false;
+})
 
 // Fires whenever the img object loads a new image (such as with img.src =)
 img.addEventListener('load', () => {
-  // TODO
-
-  // Some helpful tips:
-  // - Fill the whole Canvas with black first to add borders on non-square images, then draw on top
-  // - Clear the form when a new image is selected
-  // - If you draw the image to canvas here, it will update as soon as a new image is selected
+  dimensions = getDimmensions(400,400,img.width,img.height);
+  render();
 });
+
+const form = document.getElementById("generate-meme");
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  topText = document.getElementById("text-top").value;
+  bottomText = document.getElementById("text-bottom").value;
+  if (!topText && !bottomText) return;
+  utter = new SpeechSynthesisUtterance(topText + ".  .  ." + bottomText);
+  console.log(voiceSelect.options);
+  resetButton.disabled = false;
+  speakButton.disabled = false; 
+  render();
+})
+
+resetButton.addEventListener("click", e => {
+  topText="";
+  bottomText="";
+  imageLoaded = false;
+  render();
+  resetButton.disabled = true;
+  speakButton.disabled = true;
+  form.reset();
+})
+
+speakButton.addEventListener("click", e => {
+  speechSynthesis.speak(utter);
+})
+
+function render() {
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0,0,400,400);
+  if (imageLoaded) {
+    ctx.drawImage(img,dimensions.startX,dimensions.startY,dimensions.width,dimensions.height);
+  }
+  if (topText || bottomText) {
+    ctx.fillStyle = 'rgb(220,220,220)';
+    ctx.textBaseline = "top";
+    ctx.fillText(topText,200,5);
+    ctx.textBaseline = "bottom";
+    ctx.fillText(bottomText,200,395);
+  }
+}
 
 /**
  * Takes in the dimensions of the canvas and the new image, then calculates the new
