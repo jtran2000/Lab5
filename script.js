@@ -13,21 +13,25 @@ ctx.font = "36px Impact"
 ctx.textAlign = "center";
 const resetButton = document.querySelector("button[type='reset']");
 const speakButton = document.querySelector("button[type='button']");
+const volumeSlider = document.querySelector("input[type='range']");
+const volumeIcon = document.querySelector("#volume-group > img");
 const imageInput = document.getElementById("image-input");
 const voiceSelect = document.getElementById("voice-selection");
 
+
 speechSynthesis.addEventListener("voiceschanged", e => {
   voices = speechSynthesis.getVoices();
-  for (let voice in voices) {
-    console.log(voice);
+  voiceSelect.options.remove(0);
+  let setVoiceDefault = false;
+  for (let i in voices) {
     const option = document.createElement("option");
-    option.textContent = voice.name + ' (' + voices.lang + ')';
-    if(voices.default) {
-      option.textContent += ' -- DEFAULT';
+    option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+    option.value = i;
+    voiceSelect.options.add(option);  
+    if (!setVoiceDefault && voices[i].lang==="en-US") {
+      setVoiceDefault = true;
+      voiceSelect.value = option.value;
     }
-    option.setAttribute('data-lang', voice.lang);
-    option.setAttribute('data-name', voice.name);
-    voiceSelect.options.add(option);
   }
   voiceSelect.disabled = false;
 })
@@ -51,10 +55,11 @@ form.addEventListener('submit', e => {
   topText = document.getElementById("text-top").value;
   bottomText = document.getElementById("text-bottom").value;
   if (!topText && !bottomText) return;
-  utter = new SpeechSynthesisUtterance(topText + ".  .  ." + bottomText);
-  console.log(voiceSelect.options);
+  utter = new SpeechSynthesisUtterance(topText + ". ! , , , , , , " + bottomText);
+  //console.log(voiceSelect.options);
   resetButton.disabled = false;
-  speakButton.disabled = false; 
+  speakButton.disabled = false;
+  speechSynthesis.cancel(); 
   render();
 })
 
@@ -65,11 +70,38 @@ resetButton.addEventListener("click", e => {
   render();
   resetButton.disabled = true;
   speakButton.disabled = true;
+  speechSynthesis.cancel();
   form.reset();
 })
 
 speakButton.addEventListener("click", e => {
+  //console.log(voiceSelect.options[voiceSelect.value].dataset)
+  if (voices) {
+    utter.voice = voices[voiceSelect.value];
+  }
+  //You cannot change volume after it starts playing, so might as well set it here
+  utter.volume = volumeSlider.value / 100;
+  speechSynthesis.cancel();
   speechSynthesis.speak(utter);
+})
+
+volumeSlider.addEventListener("input",e => {
+ 
+   //Deliberately casting string to number
+  if (volumeSlider.value == 0) {
+    //speechSynthesis.cancel();
+    volumeIcon.src="icons/volume-level-0.svg";
+    
+  }
+  else if (volumeSlider.value >= 1 && volumeSlider.value <= 33) {
+    volumeIcon.src="icons/volume-level-1.svg";
+  }
+  else if (volumeSlider.value >= 34 && volumeSlider.value <= 66) {
+    volumeIcon.src="icons/volume-level-2.svg";
+  }
+  else if (volumeSlider.value >= 67 && volumeSlider.value <= 100) {
+    volumeIcon.src="icons/volume-level-3.svg";
+  }
 })
 
 function render() {
