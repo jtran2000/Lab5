@@ -5,8 +5,8 @@
 
 ## Part 1:
 
-LINK TO YOUR PUBLISHED SITE
+[https://jtran2000.github.io/Lab5/](https://jtran2000.github.io/Lab5/)
 
 ## Part 2:
 
-LINK TO YOUR PART 2 REPOSITORY
+[https://github.com/jtran2000/github-actions-for-ci](https://github.com/jtran2000/github-actions-for-ci)
