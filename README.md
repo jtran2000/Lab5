@@ -9,4 +9,4 @@
 
 ## Part 2:
 
-[https://github.com/jtran2000/github-actions-for-ci](https://github.com/jtran2000/github-actions-for-ci)
+[https://github.com/jtran2000/github-actions-for-ci/issues/7](https://github.com/jtran2000/github-actions-for-ci/issues/7)
